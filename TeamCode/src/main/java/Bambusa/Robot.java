@@ -59,9 +59,15 @@ public class Robot {
         this.frontRightMotor = hardwareMap.dcMotor.get("rightFront");
         this.backRightMotor = hardwareMap.dcMotor.get("rightRear");
 
+<<<<<<< Updated upstream
         // Launcher
         // this.launcherLeft = hardwareMap.dcMotor.get("launcherLeft");
         // this.launcherRight = hardwareMap.dcMotor.get("launcherRight");
+=======
+        // PID Use Example
+//        this.arm = hardwareMap.get(DcMotorEx.class, "slideChain");
+//        this.pid = new PID(this.arm, 0.01, 0, 0, 0.37, 0, 0, -0.00037);
+>>>>>>> Stashed changes
 
         // Setting Drive Train Motor Direction
         this.frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -82,7 +88,11 @@ public class Robot {
     public void drive(double driveSpeed, double boostSpeed, double leftx, double lefty, double rightx, double lt, boolean resetYaw) {
         // User Input (Gamepad Values Are Passed As Parameters)
         double y = -lefty;
+<<<<<<< Updated upstream
         double x = -leftx * 1.1;
+=======
+        double x = leftx * 1.1;
+>>>>>>> Stashed changes
         double rx = rightx;
 
         // Resets IMU Rotation
@@ -92,6 +102,7 @@ public class Robot {
 
         // Rotation Of Robot
         double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        botHeading *= -1;
 
         // Rotates Movement Direction To Counter Bot Rotation
         double rotX = x * Math.cos(botHeading) - y * Math.sin(botHeading);

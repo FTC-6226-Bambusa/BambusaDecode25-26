@@ -84,8 +84,11 @@ public class Tele extends LinearOpMode {
             // FTC Dashboard Telemetry
             TelemetryPacket packet = new TelemetryPacket();
 
+<<<<<<< Updated upstream
             int id = robot.detectFirstAprilTag(params.aprilTagPipeline);
 
+=======
+>>>>>>> Stashed changes
             packet.put("Dashboard Telemetry Working", true);
             packet.put("April Tag ID", id);
             dashboard.sendTelemetryPacket(packet);
