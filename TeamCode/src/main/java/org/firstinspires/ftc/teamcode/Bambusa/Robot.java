@@ -4,11 +4,15 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.Servo;
 
 public class Robot {
     public Gamepad gamepad1, gamepad2;
 
     public MecanumDrive drive;
+    public Launcher launcher;
+    public Intake intake;
+    public Outtake outtake;
 
     /**
      * Robot class (manages everything)
@@ -32,6 +36,15 @@ public class Robot {
         DcMotor br = hardwareMap.get(DcMotor.class, DriveConfig.backRightMotor);
 
         drive = new MecanumDrive(imu, fl, fr, bl, br);
+
+        // Launcher
+        launcher = new Launcher(hardwareMap.dcMotor.get(LauncherConfig.launcher));
+
+        // Intake
+        intake = new Intake(hardwareMap.get(Servo.class, LauncherConfig.intake));
+
+        // Outtake
+        outtake = new Outtake(hardwareMap.get(Servo.class, LauncherConfig.outtake));
     }
 
     /**
@@ -44,5 +57,19 @@ public class Robot {
                   gamepad1.right_stick_y,
                   gamepad1.left_trigger,
                   gamepad1.dpad_left);
+
+        // Launcher control
+        launcher.setPower(gamepad2.y, gamepad2.right_trigger > 0.1);
+        launcher.setPower(1);
+
+        // Intake control
+        if (gamepad2.dpad_down) {
+            intake.reverse();
+        }
+
+        // Outtake control
+        if (gamepad2.dpad_up) {
+            outtake.enable();
+        }
     }
 }

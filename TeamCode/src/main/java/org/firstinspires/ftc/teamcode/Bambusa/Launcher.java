@@ -17,7 +17,7 @@ public class Launcher {
      * Turns on motor
      */
     public void enable() {
-        motor.setPower(LauncherConfig.launcherSpeed);
+        motor.setPower(LauncherConfig.launcherNormalSpeed);
     }
 
     /**
@@ -25,5 +25,35 @@ public class Launcher {
      */
     public void disable() {
         motor.setPower(0);
+    }
+
+    /**
+     *
+     * @param power Power to send to motor
+     */
+    public void setPower(double power) {
+        motor.setPower(power);
+    }
+
+    /**
+     * If user presses normal speed button, the motor is
+     * set to motor speed. Pressing the boost speed button
+     * will set the code to boost speed.
+     *
+     * @param normalSpeed less speed
+     * @param boostSpeed more speed
+     */
+    public void setPower(boolean normalSpeed, boolean boostSpeed) {
+        double totalPower = 0;
+
+        if (normalSpeed) {
+            totalPower += LauncherConfig.launcherNormalSpeed;
+
+            if (boostSpeed) {
+                totalPower += LauncherConfig.launcherBoostSpeed;
+            }
+        }
+
+        motor.setPower(totalPower);
     }
 }

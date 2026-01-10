@@ -2,45 +2,46 @@ package org.firstinspires.ftc.teamcode.Bambusa;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 
 public class Intake {
-    public DcMotor motor;
+    public Servo servo;
 
     /**
      * The launching motor
      * @param motor
      */
-    public Intake(DcMotor motor) {
-        this.motor = motor;
+    public Intake(Servo servo) {
+        this.servo = servo;
     }
 
     /**
      * Turns on motor
      */
     public void enable() {
-        motor.setPower(LauncherConfig.launcherSpeed);
+        servo.setPosition(LauncherConfig.intakeSpeed + 0.5);
     }
 
     /**
      * Turns off motor
      */
     public void disable() {
-        motor.setPower(0);
+        servo.setPosition(0);
     }
 
     /**
      * Sets motor direction to reverse
      */
     public void reverse() {
-        motor.setDirection(LauncherConfig.intakeDirection == DcMotorSimple.Direction.FORWARD ?
-                                                             DcMotorSimple.Direction.REVERSE :
-                                                             DcMotorSimple.Direction.FORWARD);
+        servo.setDirection(LauncherConfig.intakeDirection == Servo.Direction.FORWARD ?
+                                                             Servo.Direction.REVERSE :
+                                                             Servo.Direction.FORWARD);
     }
 
     /**
      * Sets motor direction to forward
      */
     public void forward() {
-        motor.setDirection(LauncherConfig.intakeDirection);
+        servo.setDirection(LauncherConfig.intakeDirection);
     }
 }
