@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Bambusa;
 
+import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -7,6 +8,13 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Bambusa.RottenMustard.LincolnsRottenMustard;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Bambusa.RottenMustard.LincolnsRottenMustard;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+
 
 public class Robot {
     public Gamepad gamepad1, gamepad2;
@@ -15,6 +23,8 @@ public class Robot {
     public Launcher launcher;
     public Intake intake;
     public Outtake outtake;
+    public Follower follower;
+
 
     /**
      * Robot class (manages everything)
@@ -47,6 +57,11 @@ public class Robot {
 
         // Outtake
         outtake = new Outtake(hardwareMap.get(Servo.class, LauncherConfig.outtake));
+
+        // Follower
+        follower = Constants.createFollower(hardwareMap);
+        follower.setStartingPose(StartConfig.pose);
+        follower.startTeleOpDrive();
     }
 
     public void init() {
@@ -69,15 +84,28 @@ public class Robot {
         // Launcher control
         launcher.setPower(gamepad2.y, gamepad2.right_trigger > 0.1);
 
-//         if (gamepad2.left_bumper) {
-//             telemetry.addData("HERE, getting coords", "");
-//             double[] yaw_and_power = getCoords(0,0);
-//             assert yaw_and_power != null;
-//            double yaw = yaw_and_power[0];
-//            double power = yaw_and_power[0];
-//            launcher.setPower(power/1000);
-//            telemetry.addData("yaw: ", yaw);
-//         }
+         if (gamepad2.left_bumper) {
+             telemetry.addData("Rust Inference", "Trying");
+             telemetry.addData("Rust Inference", "Success");
+
+             follower.update();
+             double x = follower.getPose().getX();
+             double z = follower.getPose().getY();
+
+
+             double changed_x = (x - 72)/12;
+             double changed_z = (z - 72)/12;
+             telemetry.addData("X Input", changed_x);
+             telemetry.addData("Z Input", changed_z);
+
+
+             double[] choices = LincolnsRottenMustard.getCoords(changed_x,changed_z);
+             telemetry.addData("X Choice", choices[0]);
+             telemetry.addData("Z Choice", choices[1]);
+             assert choices != null;
+             launcher.setPower(choices[0]/10);
+
+         }
 
         // Intake control
         if (gamepad2.right_stick_y > 0.1) {
