@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.Bambusa;
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -37,7 +39,9 @@ public class MecanumDrive {
      * Sets motor directions and forward direction
      */
     public void init() {
+        imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(DriveConfig.logoDirection, DriveConfig.usbDirection)));
         imu.resetYaw();
+        headingOffset = StartConfig.pose.getHeading() - Math.PI / 2;
 
         fr.setDirection(DriveConfig.frontRightMotorDirection);
         fl.setDirection(DriveConfig.frontLeftMotorDirection);
@@ -54,46 +58,48 @@ public class MecanumDrive {
      * @param boost speed boost
      * @param resetYaw sets forward direction
      **/
-    public void run(double forward, double strafe, double turn, double boost, boolean resetYaw) {
-        // Useful for overriding user input
-        if (!enabled) {
-            return;
-        }
-
+    public void run(double strafe, double forward, double turn, double boost, boolean resetYaw) {
         double y = -forward;
-        double x = strafe;
+        double x = strafe * 1.1;
         double rx = turn;
 
-        double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        double rawHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
         if (resetYaw) {
-            headingOffset = heading;
+            headingOffset = rawHeading;
         }
 
-        double botHeading = -(heading - headingOffset);
+        double botHeading = rawHeading - headingOffset;
 
-        double rotX = x * Math.cos(botHeading) - y * Math.sin(botHeading);
-        double rotY = x * Math.sin(botHeading) + y * Math.cos(botHeading);
+        double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
+        double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
 
-        // Strafing correction
-        rotX *= DriveConfig.strafeCorrection;
-
+        // Calculations
         double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
+        double frontLeftPower = (rotY + rotX + rx) / denominator;
+        double backLeftPower = (rotY - rotX + rx) / denominator;
+        double frontRightPower = (rotY - rotX - rx) / denominator;
+        double backRightPower = (rotY + rotX - rx) / denominator;
 
-        double flP = (rotY + rotX + rx) / denominator;
-        double frP = (rotY - rotX - rx) / denominator;
-        double blP = (rotY - rotX + rx) / denominator;
-        double brP = (rotY + rotX - rx) / denominator;
+        // Final Speed
+        double finalSpeed = MathPlus.lerp(DriveConfig.normalSpeed,
+                                          DriveConfig.boostSpeed,
+                                          boost);
 
-        double speed = MathPlus.lerp(
-                DriveConfig.normalSpeed,
-                DriveConfig.boostSpeed,
-                boost
-        );
+        // Apply Power
+        fl.setPower(frontLeftPower * finalSpeed);
+        bl.setPower(backLeftPower * finalSpeed);
+        fr.setPower(frontRightPower * finalSpeed);
+        br.setPower(backRightPower * finalSpeed);
+    }
 
-        fl.setPower(flP * speed);
-        fr.setPower(frP * speed);
-        bl.setPower(blP * speed);
-        br.setPower(brP * speed);
+    /**
+     * Stops everything
+     */
+    public void stop() {
+        fl.setPower(0);
+        fr.setPower(0);
+        bl.setPower(0);
+        br.setPower(0);
     }
 }

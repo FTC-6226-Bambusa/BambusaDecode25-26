@@ -13,11 +13,9 @@ public class StartConfig {
     public static StartPosition position = StartPosition.GOAL;
 
     public static double midline = 72;
+    public static boolean flipped = color == AllianceColor.RED;
 
     private static Pose getPose() {
-        // Flips robot position over y midline
-        boolean flipped = color == AllianceColor.RED;
-
         if (position == StartPosition.GOAL) {
             double x = 50;
             double y = 50;
@@ -28,8 +26,8 @@ public class StartConfig {
 
             return new Pose(flippedX, y, flippedH);
         } else /*if start position is wall*/ {
-            double x = 20;
-            double y = 0;
+            double x = 63.5;
+            double y = 8.5;
             double h = 0;
 
             double flippedX = (flipped ? x : -x) + midline;

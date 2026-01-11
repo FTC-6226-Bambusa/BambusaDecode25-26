@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
 
+import com.pedropathing.control.FilteredPIDFCoefficients;
+import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
@@ -14,11 +16,18 @@ import org.firstinspires.ftc.teamcode.Bambusa.DriveConfig;
 import org.firstinspires.ftc.teamcode.Bambusa.LocalizationConfig;
 
 public class Constants {
-    public static FollowerConstants followerConstants = new FollowerConstants();
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
 
+    public static FollowerConstants followerConstants = new FollowerConstants()
+            .forwardZeroPowerAcceleration(-35.2006511)
+            .lateralZeroPowerAcceleration(-52.1848131)
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.1, 0, 0.01, 0.01))
+            .headingPIDFCoefficients(new PIDFCoefficients(1.5, 0, 0.02, 0.01))
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.2, 0, 0.02, 0.6,0.01))
+            .centripetalScaling(0.0005);
+
     public static MecanumConstants driveConstants = new MecanumConstants()
-            .maxPower(1)
+            .maxPower(3.5)
             .rightFrontMotorName(DriveConfig.frontRightMotor)
             .rightRearMotorName(DriveConfig.backRightMotor)
             .leftRearMotorName(DriveConfig.backLeftMotor)
@@ -26,15 +35,17 @@ public class Constants {
             .leftFrontMotorDirection(DriveConfig.frontLeftMotorDirection)
             .leftRearMotorDirection(DriveConfig.backLeftMotorDirection)
             .rightFrontMotorDirection(DriveConfig.frontRightMotorDirection)
-            .rightRearMotorDirection(DriveConfig.backRightMotorDirection);
+            .rightRearMotorDirection(DriveConfig.backRightMotorDirection)
+            .xVelocity(55)
+            .yVelocity(45);
 
     public static ThreeWheelIMUConstants localizerConstants = new ThreeWheelIMUConstants()
-            .forwardTicksToInches(.001989436789)
-            .strafeTicksToInches(.001989436789)
-            .turnTicksToInches(.001989436789)
-            .leftPodY(1)
-            .rightPodY(-1)
-            .strafePodX(-2.5)
+            .forwardTicksToInches(.0019450627964622915)
+            .strafeTicksToInches(.0020464263813119495)
+            .turnTicksToInches(.0020309)
+            .leftPodY(7.5)
+            .rightPodY(-7.5)
+            .strafePodX(-7.5)
             .leftEncoder_HardwareMapName(LocalizationConfig.leftEncoder)
             .rightEncoder_HardwareMapName(LocalizationConfig.rightEncoder)
             .strafeEncoder_HardwareMapName(LocalizationConfig.strafeEncoder)

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Bambusa;
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @Configurable
@@ -10,6 +11,9 @@ public class DriveConfig {
     public static double strafeCorrection = 1.1;
 
     public static String imu = "imu";
+    public static RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.LEFT;
+    public static RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.UP;
+
     public static String frontLeftMotor  = "leftFront";
     public static String frontRightMotor = "rightFront";
     public static String backLeftMotor   = "leftRear";
@@ -18,5 +22,5 @@ public class DriveConfig {
     public static DcMotorSimple.Direction frontLeftMotorDirection = DcMotorSimple.Direction.REVERSE;
     public static DcMotorSimple.Direction frontRightMotorDirection = DcMotorSimple.Direction.FORWARD;
     public static DcMotorSimple.Direction backLeftMotorDirection = DcMotorSimple.Direction.REVERSE;
-    public static DcMotorSimple.Direction backRightMotorDirection = DcMotorSimple.Direction.FORWARD;
+    public static DcMotorSimple.Direction backRightMotorDirection = DcMotorSimple.Direction.REVERSE;
 }

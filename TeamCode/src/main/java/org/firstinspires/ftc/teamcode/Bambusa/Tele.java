@@ -15,9 +15,12 @@ public class Tele extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
+        // Initializing robot
+        robot.init();
+
         while (opModeIsActive()) {
             // Running robot
-            robot.run();
+            robot.run(telemetry);
 
             // Driver Station telemetry
             telemetry.addData("Sample Telemetry Working", true);

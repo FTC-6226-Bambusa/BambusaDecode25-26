@@ -5,10 +5,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class Outtake {
     public Servo servo;
 
-    /**
-     * The launching motor
-     * @param motor
-     */
     public Outtake(Servo servo) {
         this.servo = servo;
     }
@@ -34,5 +30,11 @@ public class Outtake {
         servo.setDirection(LauncherConfig.outtakeDirection == Servo.Direction.FORWARD ?
                                                               Servo.Direction.REVERSE :
                                                               Servo.Direction.FORWARD);
+        enable();
+    }
+
+    public void forward() {
+        servo.setDirection(LauncherConfig.outtakeDirection);
+        enable();
     }
 }
