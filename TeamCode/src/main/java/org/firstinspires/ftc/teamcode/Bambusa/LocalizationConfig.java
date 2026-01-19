@@ -9,5 +9,5 @@ public class LocalizationConfig {
 
     public static double rightEncoderDirection = Encoder.FORWARD;
     public static double leftEncoderDirection = Encoder.FORWARD;
-    public static double strafeEncoderDirection = Encoder.FORWARD;
+    public static double strafeEncoderDirection = Encoder.REVERSE;
 }

@@ -25,4 +25,20 @@ public class MathPlus {
     public static double lerp(double a, double b, double t) {
         return t * (b - a) + a;
     }
+
+    /**
+     * Wraps the radians
+     *
+     * @param radians radians
+     * @return radians between -PI and PI
+     */
+    public static double angleWrap(double radians) {
+        while (radians > Math.PI) {
+            radians -= 2 * Math.PI;
+        }
+        while (radians < -Math.PI) {
+            radians += 2 * Math.PI;
+        }
+        return radians;
+    }
 }

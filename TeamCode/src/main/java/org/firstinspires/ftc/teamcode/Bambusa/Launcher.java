@@ -7,17 +7,23 @@ public class Launcher {
 
     /**
      * The launching motor
-     * @param motor
+     * @param motor the launcher motor
      */
     public Launcher(DcMotor motor) {
         this.motor = motor;
+
+        init();
+    }
+
+    public void init() {
+        motor.setDirection(LauncherConfig.launcherDirection);
     }
 
     /**
      * Turns on motor
      */
     public void enable() {
-        motor.setPower(LauncherConfig.launcherNormalSpeed);
+        motor.setPower(LauncherConfig.launcherBoostSpeed);
     }
 
     /**

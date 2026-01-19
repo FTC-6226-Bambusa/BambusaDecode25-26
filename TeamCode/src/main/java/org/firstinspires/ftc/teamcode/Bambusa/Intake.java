@@ -8,8 +8,8 @@ public class Intake {
     public Servo servo;
 
     /**
-     * The launching motor
-     * @param motor
+     * The intake servo
+     * @param servo the intake servo
      */
     public Intake(Servo servo) {
         this.servo = servo;
@@ -22,11 +22,8 @@ public class Intake {
         servo.setPosition(LauncherConfig.intakeSpeed + 0.5);
     }
 
-    /**
-     * Turns off motor
-     */
     public void disable() {
-        servo.setPosition(0);
+        servo.setPosition(0.5);
     }
 
     /**
@@ -36,6 +33,7 @@ public class Intake {
         servo.setDirection(LauncherConfig.intakeDirection == Servo.Direction.FORWARD ?
                                                              Servo.Direction.REVERSE :
                                                              Servo.Direction.FORWARD);
+        enable();
     }
 
     /**
@@ -43,5 +41,6 @@ public class Intake {
      */
     public void forward() {
         servo.setDirection(LauncherConfig.intakeDirection);
+        enable();
     }
 }

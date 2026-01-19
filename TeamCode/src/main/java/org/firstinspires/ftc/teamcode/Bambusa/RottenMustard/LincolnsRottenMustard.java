@@ -1,51 +1,41 @@
 package org.firstinspires.ftc.teamcode.Bambusa.RottenMustard;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public class LincolnsRottenMustard {
-
-    public static double[] getCoords(double val1, double val2) {
-        String binaryPath = "./encompassing";
-
+    static {
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder(
-                    binaryPath,
-                    String.valueOf(val1),
-                    String.valueOf(val2));
+            System.loadLibrary("shared");
+        } catch (UnsatisfiedLinkError e) {
+            System.err.println("Failed to load Rust library. Check jniLibs folder!");
+            e.printStackTrace();
+        }
+    }
+    private static native float[] runInference(float x, float z);
 
-            processBuilder.redirectErrorStream(true);
-            Process process = processBuilder.start();
+    /**
+     * @param val1 X Input
+     * @param val2 Z Input
+     * @return double[] {Yaw, Power} or null on error
+     */
+    public static double[] getCoords(double val1, double val2) {
+        try {
+            float x = (float) val1;
+            float z = (float) val2;
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
+            float[] result = runInference(x, z);
 
-            Pattern pattern = Pattern.compile("Choice:\\s*\\[(.*?),(.*?)\\]");
-            double[] results = null;
-
-            while ((line = reader.readLine()) != null) {
-                Matcher matcher = pattern.matcher(line);
-                if (matcher.find()) {
-                    try {
-                        double num1 = Double.parseDouble(matcher.group(1).trim());
-                        double num2 = Double.parseDouble(matcher.group(2).trim());
-                        results = new double[]{num1, num2};
-                        break;
-                    } catch (NumberFormatException e) {
-                        System.err.println("Could not parse numbers from output: " + line);
-                    }
-                }
+            // Validation
+            if (result == null || result.length < 2) {
+                return null;
             }
 
-            process.waitFor();
-            return results;
+            return new double[] { (double)result[0], (double)result[1] };
 
+        } catch (UnsatisfiedLinkError e) {
+            e.printStackTrace();
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 }
-

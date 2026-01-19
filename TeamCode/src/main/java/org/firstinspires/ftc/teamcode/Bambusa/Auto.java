@@ -1,174 +1,222 @@
 package org.firstinspires.ftc.teamcode.Bambusa;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.paths.PathChain;
-import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous (name = "__AUTO__", group = "COMPETITION")
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+@Autonomous(name = "AUTO", group = "COMPETITION")
 public class Auto extends OpMode {
+    // Robot
+    private Robot robot;
+
+    // Follower
     private Follower follower;
-    private Timer pathTimer, opModeTimer;
 
-    public enum PathState {
-        START_TO_BACK_ROW,
-        BACK_ROW_TO_LAUNCH,
-        LAUNCH1,
-        LAUNCH_TO_MIDDLE_ROW,
-        MIDDLE_ROW_TO_LAUNCH,
-        LAUNCH2,
-        LAUNCH_TO_FRONT_ROW,
-        FRONT_ROW_TO_LAUNCH,
-        LAUNCH3,
-        EXIT
-    }
+    private AutoConfig paths;
 
-    PathState pathState;
+    // Timer
+    private final ElapsedTime timer = new ElapsedTime();
 
-    // All trajectories
-    private PathChain startToBackRow, backRowToLaunch, launch1, launchToMiddleRow,
-                      middleRowToLaunch, launch2, launchToFrontRow, frontRowToLaunch,
-                      launch3;
+    // State machine
+    private int pathIndex = -1;
+    private boolean isDriving = false;
 
-    /**
-     * Builds the actual trajectories of the paths.<br>
-     * Use PedroPathing visualizer to create.
-     */
-    public void buildPaths() {
-        startToBackRow = follower.pathBuilder()
-                .addPath(new BezierLine(StartConfig.pose, StartConfig.pose))
-                .build();
+    // Ordered paths
+    private List<NamedPath> pathSequence = new ArrayList<>();
 
-        backRowToLaunch = follower.pathBuilder()
-                .addPath(new BezierLine(StartConfig.pose, StartConfig.pose))
-                .build();
+    private static class NamedPath {
+        String name;
+        PathChain pathChain;
 
-        launch1 = follower.pathBuilder()
-                .addPath(new BezierLine(StartConfig.pose, StartConfig.pose))
-                .build();
-
-        launchToMiddleRow = follower.pathBuilder()
-                .addPath(new BezierLine(StartConfig.pose, StartConfig.pose))
-                .build();
-
-        middleRowToLaunch = follower.pathBuilder()
-                .addPath(new BezierLine(StartConfig.pose, StartConfig.pose))
-                .build();
-
-        launch2 = follower.pathBuilder()
-                .addPath(new BezierLine(StartConfig.pose, StartConfig.pose))
-                .build();
-
-        launchToFrontRow = follower.pathBuilder()
-                .addPath(new BezierLine(StartConfig.pose, StartConfig.pose))
-                .build();
-
-        frontRowToLaunch = follower.pathBuilder()
-                .addPath(new BezierLine(StartConfig.pose, StartConfig.pose))
-                .build();
-
-        launch3 = follower.pathBuilder()
-                .addPath(new BezierLine(StartConfig.pose, StartConfig.pose))
-                .build();
-    }
-
-    /**
-     * Updates which path the follower is following.<br>
-     * Switches path after it has completed one.
-     */
-    public void statePathUpdate() {
-        switch (pathState) {
-            case START_TO_BACK_ROW:
-                follower.followPath(startToBackRow, true);
-                setPathState(PathState.BACK_ROW_TO_LAUNCH);
-                break;
-
-            case BACK_ROW_TO_LAUNCH:
-                follower.followPath(backRowToLaunch, true);
-                setPathState(PathState.LAUNCH1);
-                break;
-
-            case LAUNCH1:
-                follower.followPath(launch1, true);
-                setPathState(PathState.LAUNCH_TO_MIDDLE_ROW);
-                break;
-
-            case LAUNCH_TO_MIDDLE_ROW:
-                follower.followPath(launchToMiddleRow, true);
-                setPathState(PathState.MIDDLE_ROW_TO_LAUNCH);
-                break;
-
-            case MIDDLE_ROW_TO_LAUNCH:
-                follower.followPath(middleRowToLaunch, true);
-                setPathState(PathState.LAUNCH2);
-                break;
-
-            case LAUNCH2:
-                follower.followPath(launch2, true);
-                setPathState(PathState.LAUNCH_TO_FRONT_ROW);
-                break;
-
-            case LAUNCH_TO_FRONT_ROW:
-                follower.followPath(launchToFrontRow, true);
-                setPathState(PathState.FRONT_ROW_TO_LAUNCH);
-                break;
-
-            case FRONT_ROW_TO_LAUNCH:
-                follower.followPath(frontRowToLaunch, true);
-                setPathState(PathState.LAUNCH3);
-                break;
-
-            case LAUNCH3:
-                follower.followPath(launch3, true);
-                setPathState(PathState.EXIT);
-                break;
-
-            default:
-                // do nothing
-                break;
+        NamedPath(String name, PathChain pathChain) {
+            this.name = name;
+            this.pathChain = pathChain;
         }
     }
 
     /**
-     * Helper function to switch trajectory
+     * <div style="color: lime; font-weight: bold;">PLACE CUSTOM ACTIONS HERE</div>
+     * Runs a custom action after a specific trajectory has been completed
      *
-     * @param newState next state
+     * @param pathName the path triggering the custom action
+     * @return if the custom action executed
      */
-    public void setPathState(PathState newState) {
-        pathState = newState;
-        pathTimer.resetTimer();
+    private boolean runCustomAction(String pathName) {
+        if (pathName == null) return true;
+
+        switch (pathName) {
+            case "p03launch1":
+                telemetry.addData("Action: ", "Shooting");
+
+                // Shooting ball
+                robot.outtake.enable();
+
+                if (timer.milliseconds() > 2000) {
+                    robot.disableLaunchers();
+
+                    return true;
+                }
+
+                return false;
+
+            default:
+                // Nothing happens if there is no custom action
+                return true;
+        }
     }
 
     @Override
     public void init() {
-        pathState = PathState.START_TO_BACK_ROW;
-        pathTimer = new Timer();
-        opModeTimer = new Timer();
+        // Updating pose
+        StartConfig.updatePose();
 
+        // Start position telemetry
+        telemetry.addData("START X: ", StartConfig.pose.getX());
+        telemetry.addData("START Y: ", StartConfig.pose.getY());
+        telemetry.addData("START H: ", StartConfig.pose.getHeading());
+
+        // Initialize Follower
         follower = Constants.createFollower(hardwareMap);
 
-        buildPaths();
-        follower.setPose(StartConfig.pose);
+        // Fields
+        Field[] fields;
+
+        // Initialize Path
+        if (StartConfig.color == StartConfig.AllianceColor.RED) {
+            if (StartConfig.position == StartConfig.position.WALL) {
+                // COLOR: RED
+                // START: WALL
+
+                paths = new AutoConfig.RED_WALL(follower);
+                fields = AutoConfig.RED_WALL.class.getFields();
+            } else {
+                // COLOR: RED
+                // START: GOAL
+
+                paths = new AutoConfig.RED_GOAL(follower);
+                fields = AutoConfig.RED_GOAL.class.getFields();
+            }
+        } else {
+            if (StartConfig.position == StartConfig.position.WALL) {
+                // COLOR: BLUE
+                // START: WALL
+
+                paths = new AutoConfig.BLUE_WALL(follower);
+                fields = AutoConfig.BLUE_WALL.class.getFields();
+            } else {
+                // COLOR: BLUE
+                // START: GOAL
+
+                paths = new AutoConfig.BLUE_GOAL(follower);
+                fields = AutoConfig.BLUE_GOAL.class.getFields();
+            }
+        }
+
+        for (Field field : fields) {
+            if (field.getType() == PathChain.class && field.getName().startsWith("p")) {
+                try {
+                    PathChain p = (PathChain) field.get(paths);
+                    if (p != null) {
+                        pathSequence.add(new NamedPath(field.getName(), p));
+                    }
+                } catch (IllegalAccessException e) {
+                    telemetry.addData("Error", "Could not access path: " + field.getName());
+                }
+            }
+        }
+
+        // Alphabetical sorting for path order
+        Collections.sort(pathSequence, Comparator.comparing(o -> o.name));
+        Drawing.init();
+
+        if (!pathSequence.isEmpty()) {
+            follower.setStartingPose(StartConfig.pose);
+        }
+
+        telemetry.addData("Path: ", "Initialized");
+        telemetry.addData("Sequence Size: ", pathSequence.size());
+
+        for(NamedPath np : pathSequence) {
+            telemetry.addData("Found Path: ", np.name);
+        }
+
+        telemetry.update();
     }
 
+    @Override
     public void start() {
-        opModeTimer.resetTimer();
-        setPathState(pathState);
+        robot = new Robot(hardwareMap);
+
+        startNextPath();
     }
 
     @Override
     public void loop() {
+        // Update Follower
         follower.update();
-        statePathUpdate();
 
-        telemetry.addData("Path State: ", pathState.toString());
-        telemetry.addData("X: ", pathState.toString());
-        telemetry.addData("Y: ", pathState.toString());
-        telemetry.addData("Heading: ", pathState.toString());
-        telemetry.addData("Path Time: ", pathState.toString());
+        // Drawing robot
+        Drawing.drawRobot(follower.getPose());
+        Drawing.sendPacket();
+
+        // State machine
+        if (isDriving) {
+            if (!follower.isBusy()) {
+                isDriving = false;
+
+                timer.reset();
+                telemetry.addData("Status", "Path Finished. Running Action...");
+            } else {
+                telemetry.addData("Status", "Driving: " + getCurrentPathName());
+            }
+        } else {
+            // State
+            String completedPath = getCurrentPathName();
+            boolean actionFinished = runCustomAction(completedPath);
+
+            if (actionFinished) {
+                startNextPath();
+            }
+        }
+
+        // Telemetry
+        telemetry.addData("X", follower.getPose().getX());
+        telemetry.addData("Y", follower.getPose().getY());
+        telemetry.addData("Heading", Math.toDegrees(follower.getPose().getHeading()));
+        telemetry.update();
+    }
+
+    /**
+     * Raises path index by 1 to transfer to next path
+     */
+    private void startNextPath() {
+        pathIndex++;
+        if (pathIndex < pathSequence.size()) {
+            NamedPath next = pathSequence.get(pathIndex);
+            follower.followPath(next.pathChain, true);
+            isDriving = true;
+        }
+    }
+
+    /**
+     * Gets current path name
+     *
+     * @return current path name
+     */
+    private String getCurrentPathName() {
+        if (pathIndex >= 0 && pathIndex < pathSequence.size()) {
+            return pathSequence.get(pathIndex).name;
+        }
+        return "NONE";
     }
 }
