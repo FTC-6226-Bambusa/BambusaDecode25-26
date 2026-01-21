@@ -1,12 +1,13 @@
-package org.firstinspires.ftc.teamcode.Bambusa;
+package org.firstinspires.ftc.teamcode.Bambusa.Configurations;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 
 public class AutoConfig {
+    public static double shootingTime = 2;
+
     /**
      * Paste paths here from Pedro Pathing Visualizer.<br>
      * Ensure that you remove 'true' from .setReversed(true), as it was removed in PedroPathing 2.0.0<br>
@@ -21,7 +22,17 @@ public class AutoConfig {
      * on the starting position of the auto.
      **/
 
-    /** --- BLUE WALL AUTO --- WORKS **/
+    /**
+     * Instructions for Pedro Pathing Visualizer:
+     * Order paths by adding a prefix to each path, p##. Ex: p00 executed first and p99 being the last executed.
+     * Use word 'start' in the first path to activate shooting motors.
+     * Use word 'end' in your last path to deactivate shooting motors.
+     * Use word 'launch' in any of your paths to activate outtake to shoot ball.
+     * These custom actions occur AFTER the specific trajectory is done, so if you name a path
+     * p03_middle_to_launch, then launching will occur after the robot is at the launching site.
+     */
+
+    /** --- BLUE WALL AUTO --- **/
     public static class BLUE_WALL extends AutoConfig {
         public PathChain p01travel;
         public PathChain p02collect;
@@ -57,7 +68,7 @@ public class AutoConfig {
         }
     }
 
-    /** --- BLUE GOAL AUTO ---  WORKS **/
+    /** --- BLUE GOAL AUTO ---  **/
     public static class BLUE_GOAL extends AutoConfig {
         public PathChain p01travel;
         public PathChain p03launch1;
@@ -85,7 +96,7 @@ public class AutoConfig {
         }
     }
 
-    /** --- RED WALL AUTO --- WORKS **/
+    /** --- RED WALL AUTO --- **/
     public static class RED_WALL extends AutoConfig {
         public PathChain p01travel;
         public PathChain p02travel;

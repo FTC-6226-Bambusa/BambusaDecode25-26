@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Bambusa;
+package org.firstinspires.ftc.teamcode.Bambusa.Configurations;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.geometry.Pose;
@@ -15,7 +15,7 @@ public class StartConfig {
     public static AllianceColor color = AllianceColor.RED;
     public static StartPosition position = StartPosition.WALL;
 
-    private static Pose getPose(StartPosition start, AllianceColor col) {
+    public static Pose getPose(StartPosition start, AllianceColor col) {
         boolean red = col == AllianceColor.RED;
         boolean wall = start == StartPosition.WALL;
         boolean goal = start == StartPosition.GOAL;

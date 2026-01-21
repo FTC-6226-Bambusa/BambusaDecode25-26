@@ -6,14 +6,11 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
 import com.pedropathing.ftc.drivetrains.MecanumConstants;
-import com.pedropathing.ftc.localization.Encoder;
 import com.pedropathing.ftc.localization.constants.ThreeWheelIMUConstants;
 import com.pedropathing.paths.PathConstraints;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import org.firstinspires.ftc.teamcode.Bambusa.DriveConfig;
-import org.firstinspires.ftc.teamcode.Bambusa.LocalizationConfig;
+import org.firstinspires.ftc.teamcode.Bambusa.Configurations.DriveConfig;
+import org.firstinspires.ftc.teamcode.Bambusa.Configurations.LocalizationConfig;
 
 public class Constants {
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);

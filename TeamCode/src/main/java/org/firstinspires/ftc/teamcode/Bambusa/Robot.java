@@ -8,11 +8,16 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Bambusa.Configurations.Controls;
+import org.firstinspires.ftc.teamcode.Bambusa.Configurations.DriveConfig;
+import org.firstinspires.ftc.teamcode.Bambusa.Configurations.LauncherConfig;
+import org.firstinspires.ftc.teamcode.Bambusa.Configurations.StartConfig;
+import org.firstinspires.ftc.teamcode.Bambusa.Helpers.MathPlus;
 import org.firstinspires.ftc.teamcode.Bambusa.RottenMustard.LincolnsRottenMustard;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 public class Robot {
-    public Gamepad gamepad1, gamepad2;
+    public Controls controls;
 
     public MecanumDrive drive;
     public Launcher launcher;
@@ -30,8 +35,7 @@ public class Robot {
      */
     public Robot(HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2) {
         // Gamepads
-        this.gamepad1 = gamepad1;
-        this.gamepad2 = gamepad2;
+        controls = new Controls(gamepad1, gamepad2);
 
         // IMU
         IMU imu = hardwareMap.get(IMU.class, DriveConfig.imu);
@@ -56,6 +60,8 @@ public class Robot {
         // Follower
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(StartConfig.pose);
+
+        // teleInit isn't used because we don't want motors to run during startup
     }
 
     /**
@@ -64,17 +70,21 @@ public class Robot {
      * @param hardwareMap hardware map
      */
     public Robot(HardwareMap hardwareMap) {
+        // Launcher motors
         launcher = new Launcher(hardwareMap.dcMotor.get(LauncherConfig.launcher));
         intake = new Intake(hardwareMap.get(Servo.class, LauncherConfig.intake));
         outtake = new Outtake(hardwareMap.get(Servo.class, LauncherConfig.outtake));
 
+        // Initializes for auto since no gamepads are passed in
         autoInit();
     }
 
+    // Initializes for tele
     public void teleInit() {
         intake.enable();
     }
 
+    // Initializes for auto
     public void autoInit() {
         intake.enable();
         launcher.setPower(LauncherConfig.launcherAutoSpeed);
@@ -87,13 +97,17 @@ public class Robot {
         // Update localizer
         follower.poseTracker.update();
 
+        // Disables robot
+        if (controls.disableRobot()) {
+            disable();
+            return;
+        }
+
         // Drive inputs
-        double forward = gamepad1.left_stick_y;
-        double strafe = gamepad1.left_stick_x;
-        double turn = gamepad1.right_stick_x;
+        double turn = controls.turn();
 
         // Auto aiming
-        if (gamepad2.right_bumper) {
+        if (controls.aim()) {
             drive.enabled = true;
 
             double x = follower.getPose().getX();
@@ -128,24 +142,27 @@ public class Robot {
             drive.enabled = true;
         }
 
-        boolean dpad = gamepad1.dpad_left || gamepad1.dpad_right || gamepad1.dpad_down || gamepad1.dpad_up;
-        drive.run(strafe, forward, turn, gamepad1.right_trigger, dpad);
+        // Driving
+        drive.run(controls.strafe(), controls.forward(), turn, controls.boost(), controls.resetIMU());
 
         // Intake control
-        if (gamepad2.right_stick_y > GamepadConfig.stickThreshold) {
+        if (controls.reverseIntake()) {
             intake.reverse();
         } else {
             intake.forward();
         }
 
         // Outtake control
-        if (gamepad2.left_stick_y > GamepadConfig.stickThreshold) {
+        if (controls.reverseOuttake()) {
             outtake.reverse();
-        } else if (gamepad2.left_stick_y < -GamepadConfig.stickThreshold) {
+        } else if (controls.powerOuttake()) {
             outtake.forward();
         } else {
             outtake.disable();
         }
+
+        // Launcher control
+        launcher.setPower(controls.launch(), controls.launchBoost());
     }
 
     /**
@@ -153,7 +170,6 @@ public class Robot {
      */
     public void disable() {
         drive.stop();
-
         disableLaunchers();
     }
 

@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.Bambusa;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.firstinspires.ftc.teamcode.Bambusa.Configurations.LauncherConfig;
+
 public class Launcher {
     public DcMotor motor;
 

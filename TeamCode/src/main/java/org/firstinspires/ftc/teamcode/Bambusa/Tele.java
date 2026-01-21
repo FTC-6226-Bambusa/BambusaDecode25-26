@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Bambusa;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.Bambusa.Helpers.Drawing;
 import org.firstinspires.ftc.teamcode.Bambusa.RottenMustard.JoystickLogger;
 
 @TeleOp (name = "__TELEOP__", group = "COMPETITION")
@@ -24,7 +25,7 @@ public class Tele extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        // Starting logging
+        // Starting logging gamepad
         logger.startLogging();
 
         // Initializing robot
@@ -37,16 +38,15 @@ public class Tele extends LinearOpMode {
             // Logging joystick (250ms resolution)
             logger.logLoop(gamepad1, gamepad2);
 
-            // Driver Station telemetry
-            telemetry.addData("Sample Telemetry Working", true);
-            telemetry.update();
-
             // Robot drawing
             Drawing.drawRobot(robot.follower.getPose());
             Drawing.sendPacket();
+
+            // Updating telemetry
+            telemetry.update();
         }
 
-        // Stop logging
+        // Stop logging gamepad
         logger.stopLogging();
 
         // Dying words of the robot

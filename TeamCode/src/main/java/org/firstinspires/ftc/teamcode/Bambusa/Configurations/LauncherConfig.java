@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Bambusa;
+package org.firstinspires.ftc.teamcode.Bambusa.Configurations;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;

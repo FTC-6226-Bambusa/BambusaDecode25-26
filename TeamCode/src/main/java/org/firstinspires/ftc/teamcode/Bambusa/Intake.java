@@ -1,8 +1,8 @@
 package org.firstinspires.ftc.teamcode.Bambusa;
 
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.teamcode.Bambusa.Configurations.LauncherConfig;
 
 public class Intake {
     public Servo servo;

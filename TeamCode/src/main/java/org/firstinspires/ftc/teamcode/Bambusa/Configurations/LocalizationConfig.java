@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Bambusa;
+package org.firstinspires.ftc.teamcode.Bambusa.Configurations;
 
 import com.pedropathing.ftc.localization.Encoder;
 
