@@ -4,20 +4,18 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Bambusa.Helpers.Drawing;
-import org.firstinspires.ftc.teamcode.Bambusa.RottenMustard.JoystickLogger;
+import org.firstinspires.ftc.teamcode.Bambusa.SLURPIE.CollectData;
 
 @TeleOp (name = "__TELEOP__", group = "COMPETITION")
 public class Tele extends LinearOpMode {
 
     public Robot robot;
-    JoystickLogger logger;
+    public CollectData data;
 
     @Override
     public void runOpMode() throws InterruptedException {
+        // Robot
         robot = new Robot(hardwareMap, gamepad1, gamepad2);
-
-        // Gamepad logger (for LRM)
-        logger =  new JoystickLogger();
 
         // Start drawing
         Drawing.init();
@@ -25,8 +23,9 @@ public class Tele extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        // Starting logging gamepad
-        logger.startLogging();
+        // Starting gamepad data collection
+        data = new CollectData();
+        data.init(hardwareMap, gamepad1, gamepad2);
 
         // Initializing robot
         robot.teleInit();
@@ -36,7 +35,7 @@ public class Tele extends LinearOpMode {
             robot.run(telemetry);
 
             // Logging joystick (250ms resolution)
-            logger.logLoop(gamepad1, gamepad2);
+            data.update(gamepad1);
 
             // Robot drawing
             Drawing.drawRobot(robot.follower.getPose());
@@ -46,8 +45,8 @@ public class Tele extends LinearOpMode {
             telemetry.update();
         }
 
-        // Stop logging gamepad
-        logger.stopLogging();
+        // Stop data collection
+        data.end();
 
         // Dying words of the robot
         telemetry.addData("Status", "File Saved Successfully.");

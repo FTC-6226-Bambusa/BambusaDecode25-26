@@ -1,17 +1,19 @@
 package org.firstinspires.ftc.teamcode.Bambusa;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode.Bambusa.Configurations.LauncherConfig;
+import org.firstinspires.ftc.teamcode.Bambusa.Helpers.PID;
 
 public class Launcher {
-    public DcMotor motor;
+    public DcMotorEx motor;
 
     /**
      * The launching motor
      * @param motor the launcher motor
      */
-    public Launcher(DcMotor motor) {
+    public Launcher(DcMotorEx motor) {
         this.motor = motor;
 
         init();
@@ -25,7 +27,7 @@ public class Launcher {
      * Turns on motor
      */
     public void enable() {
-        motor.setPower(LauncherConfig.launcherBoostSpeed);
+        motor.setPower(LauncherConfig.launcherAutoSpeed);
     }
 
     /**

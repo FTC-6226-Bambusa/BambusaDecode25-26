@@ -21,6 +21,10 @@ public class LauncherConfig {
     public static double launcherBoostSpeed = 0.9;
     public static double launcherReverseSpeed = 0.15;
 
-    // Auto only
+    // Autos only
     public static double launcherAutoSpeed = 0.9;
+
+    // Macros only
+    public static double LRMLauncherSpeedFactor = 0.86;
+    public static double LRMLauncherSpeedBias = 0.135;
 }

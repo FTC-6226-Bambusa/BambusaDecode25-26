@@ -21,11 +21,11 @@ public class StartConfig {
         boolean goal = start == StartPosition.GOAL;
 
         if (wall) {
-            return red ? new Pose(60, 9, Math.toRadians(-90)):
-                    new Pose(60, 9, Math.toRadians(-90));
+            return red ? new Pose(57, 9.3, Math.toRadians(90)):
+                         new Pose(87, 9.3, Math.toRadians(90));
         } else if (goal) {
-            return red ? new Pose(83, 9, Math.toRadians(-90)):
-                    new Pose(60, 9, Math.toRadians(-90));
+            return red ? new Pose(27.3, 130, Math.toRadians(-36)):
+                         new Pose(116, 130, Math.toRadians(216));
         }
 
         // Default case

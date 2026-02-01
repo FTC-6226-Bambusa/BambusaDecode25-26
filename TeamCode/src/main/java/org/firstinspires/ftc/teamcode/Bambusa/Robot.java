@@ -1,7 +1,11 @@
 package org.firstinspires.ftc.teamcode.Bambusa;
 
 import com.pedropathing.follower.Follower;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -14,17 +18,22 @@ import org.firstinspires.ftc.teamcode.Bambusa.Configurations.LauncherConfig;
 import org.firstinspires.ftc.teamcode.Bambusa.Configurations.StartConfig;
 import org.firstinspires.ftc.teamcode.Bambusa.Helpers.MathPlus;
 import org.firstinspires.ftc.teamcode.Bambusa.RottenMustard.LincolnsRottenMustard;
+import org.firstinspires.ftc.teamcode.Bambusa.RottenMustard.SlurpSlurp;
+import org.firstinspires.ftc.teamcode.Bambusa.SLURPIE.Artifact;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
+import java.util.List;
+
 public class Robot {
+    public Limelight3A LL;
     public Controls controls;
 
     public MecanumDrive drive;
     public Launcher launcher;
     public Intake intake;
     public Outtake outtake;
-
     public Follower follower;
+    public Artifact artifact;
 
     /**
      * Robot class for Tele
@@ -36,6 +45,9 @@ public class Robot {
     public Robot(HardwareMap hardwareMap, Gamepad gamepad1, Gamepad gamepad2) {
         // Gamepads
         controls = new Controls(gamepad1, gamepad2);
+
+        // Limelight
+        LL = hardwareMap.tryGet(Limelight3A.class, "lemonlight");
 
         // IMU
         IMU imu = hardwareMap.get(IMU.class, DriveConfig.imu);
@@ -49,7 +61,7 @@ public class Robot {
         drive = new MecanumDrive(imu, fr, fl, bl, br);
 
         // Launcher
-        launcher = new Launcher(hardwareMap.dcMotor.get(LauncherConfig.launcher));
+        launcher = new Launcher(hardwareMap.get(DcMotorEx.class, LauncherConfig.launcher));
 
         // Intake
         intake = new Intake(hardwareMap.get(Servo.class, LauncherConfig.intake));
@@ -61,6 +73,8 @@ public class Robot {
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(StartConfig.pose);
 
+        artifact = new Artifact();
+
         // teleInit isn't used because we don't want motors to run during startup
     }
 
@@ -71,7 +85,7 @@ public class Robot {
      */
     public Robot(HardwareMap hardwareMap) {
         // Launcher motors
-        launcher = new Launcher(hardwareMap.dcMotor.get(LauncherConfig.launcher));
+        launcher = new Launcher(hardwareMap.get(DcMotorEx.class, LauncherConfig.launcher));
         intake = new Intake(hardwareMap.get(Servo.class, LauncherConfig.intake));
         outtake = new Outtake(hardwareMap.get(Servo.class, LauncherConfig.outtake));
 
@@ -82,6 +96,13 @@ public class Robot {
     // Initializes for tele
     public void teleInit() {
         intake.enable();
+
+        // Limelight settings
+        LL.setPollRateHz(100);
+        LL.pipelineSwitch(0);
+
+        // Starting limelight
+        LL.start();
     }
 
     // Initializes for auto
@@ -109,9 +130,10 @@ public class Robot {
         // Auto aiming
         if (controls.aim()) {
             drive.enabled = true;
+            boolean flip = StartConfig.color == StartConfig.AllianceColor.RED;
 
-            double x = follower.getPose().getX();
-            double z = follower.getPose().getY();
+            double x = follower.getPose().getY();
+            double z = follower.getPose().getX();
 
             double changed_x = (x - 72) / 12;
             double changed_z = (z - 72) / 12;
@@ -119,8 +141,9 @@ public class Robot {
             double[] choices = LincolnsRottenMustard.getCoords(changed_x, changed_z);
 
             if (choices != null) {
-                double targetYaw = Math.toRadians(choices[0] + 45); // Target Angle
-                double launcherPower = choices[1];
+                double targetYaw = Math.toRadians(choices[0] + 225); // Target Angle
+
+                double launcherPower = choices[1] * LauncherConfig.LRMLauncherSpeedFactor + LauncherConfig.LRMLauncherSpeedBias;
 
                 double currentYaw = follower.getPose().getHeading();
                 double difference = MathPlus.angleWrap(targetYaw - currentYaw);
@@ -135,15 +158,56 @@ public class Robot {
                 telemetry.addData("Mode", "Auto-Aiming");
                 telemetry.addData("Target Heading", Math.toDegrees(targetYaw));
                 telemetry.addData("Turn Correction", turn);
-                telemetry.addData("Launcher Power", launcherPower / 10);
+                telemetry.addData("Launcher Power", launcherPower);
             }
 
         } else {
             drive.enabled = true;
         }
 
+        // Slurpie running
+        if (controls.slurp()) {
+            double[] LLoutput = getLimelightArtifacts();
+
+            // Noise smoothing
+            artifact.smoothData(LLoutput);
+
+            if (LLoutput[0] != -1) {
+                drive.enabled = false;
+
+                // Running slurpie
+                double[] slurpieOutput = SlurpSlurp.letsGetSlurpy(LLoutput[0], LLoutput[1], LLoutput[2]);
+
+                // Limelight outputs
+                telemetry.addLine("LIMELIGHT OUTPUT: ");
+                telemetry.addData("X: ", LLoutput[0]);
+                telemetry.addData("Y: ", LLoutput[1]);
+                telemetry.addData("A: ", LLoutput[2]);
+
+                // Slurpie outputs (currently bugged)
+                telemetry.addLine("SLURPIE OUTPUT: ");
+                telemetry.addData("Forward: ", slurpieOutput[0]);
+                telemetry.addData("Strafe: ", slurpieOutput[1]);
+                telemetry.addData("Turn: ", slurpieOutput[2]);
+                telemetry.addData("Boost: ", slurpieOutput[3]);
+
+                // Driving with slurpie
+                 if ((slurpieOutput != null ? slurpieOutput[0] : -1) != -1) {
+                     drive.runWithoutIMU(slurpieOutput[1], slurpieOutput[0], slurpieOutput[2], slurpieOutput[3]);
+                 }
+            } else {
+                drive.enabled = true;
+            }
+        } else {
+            drive.enabled = true;
+        }
+
         // Driving
-        drive.run(controls.strafe(), controls.forward(), turn, controls.boost(), controls.resetIMU());
+        if (DriveConfig.useFieldCentricDrive) {
+            drive.run(controls.strafe(), controls.forward(), turn, controls.boost(), controls.resetIMU());
+        } else {
+            drive.runWithoutIMU(controls.strafe(), controls.forward(), turn, controls.boost());
+        }
 
         // Intake control
         if (controls.reverseIntake()) {
@@ -163,6 +227,38 @@ public class Robot {
 
         // Launcher control
         launcher.setPower(controls.launch(), controls.launchBoost());
+    }
+
+    /**
+     * Helper class which gets Limelight output
+     */
+    public double[] getLimelightArtifacts() {
+        LLResult result = LL.getLatestResult();
+
+        if (result != null && result.isValid()) {
+            List<LLResultTypes.DetectorResult> detections = result.getDetectorResults();
+
+            if (detections != null && !detections.isEmpty()) {
+                LLResultTypes.DetectorResult closestObject = null;
+                double maxBoxSize = -1;
+
+                for (LLResultTypes.DetectorResult detection : detections) {
+                    if (detection.getTargetArea() > maxBoxSize) {
+                        maxBoxSize = detection.getTargetArea();
+                        closestObject = detection;
+                    }
+                }
+
+                // Log the values for the closest object found
+                if (closestObject != null) {
+                    return new double[]{closestObject.getTargetXDegrees(),
+                                        closestObject.getTargetYDegrees(),
+                                        closestObject.getTargetArea()};
+                }
+            }
+        }
+
+        return new double[] {-1, -1, -1};
     }
 
     /**

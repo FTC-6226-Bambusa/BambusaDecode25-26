@@ -21,12 +21,12 @@ public class Controls {
 
     // Drive strafe
     public double strafe() {
-        return gamepad1.left_stick_y;
+        return gamepad1.left_stick_x;
     }
 
     // Drive forward
     public double forward() {
-        return gamepad1.left_stick_x;
+        return gamepad1.left_stick_y;
     }
 
     // Drive turn
@@ -42,11 +42,6 @@ public class Controls {
     // Drive resetting IMU
     public boolean resetIMU() {
         return gamepad1.dpad_down || gamepad1.dpad_left || gamepad1.dpad_right || gamepad1.dpad_up;
-    }
-
-    // Drive aiming toward goal
-    public boolean aim() {
-        return gamepad2.right_bumper;
     }
 
     // Intake reversing
@@ -87,5 +82,17 @@ public class Controls {
 
     public boolean toggleStartingPosition() {
         return gamepad1.aWasPressed();
+    }
+
+    /** --- MACRO CONTROLS --- **/
+
+    // Drive aiming toward goal
+    public boolean aim() {
+        return gamepad2.right_bumper;
+    }
+
+    // Activate artifact path finding
+    public boolean slurp() {
+        return gamepad2.dpad_down;
     }
 }

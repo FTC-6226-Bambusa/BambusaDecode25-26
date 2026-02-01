@@ -30,10 +30,7 @@ public class LincolnsRottenMustard {
 
             return new double[] { (double)result[0], (double)result[1] };
 
-        } catch (UnsatisfiedLinkError e) {
-            e.printStackTrace();
-            return null;
-        } catch (Exception e) {
+        } catch (UnsatisfiedLinkError | Exception e) {
             e.printStackTrace();
             return null;
         }

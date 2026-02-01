@@ -64,7 +64,7 @@ public class Auto extends OpMode {
         // Default custom actions
 
         // Launching actions
-        if (pathName.contains("launch")) {
+        if (pathName.toLowerCase().contains("launch")) {
             telemetry.addData("Action: ", "Shooting");
 
             // Shooting ball
@@ -74,18 +74,18 @@ public class Auto extends OpMode {
         }
 
         // Starting actions
-        if (pathName.contains("start")) {
+        if (pathName.toLowerCase().contains("start")) {
             robot.launcher.setPower(LauncherConfig.launcherAutoSpeed);
             robot.intake.enable();
             return true;
         }
 
         // Ending actions
-        if (pathName.contains("end")) {
+        if (pathName.toLowerCase().contains("end")) {
             robot.disableLaunchers();
 
-            // Second of dead time
-            return timer.milliseconds() > 1000;
+            // Dead robot
+            return false;
         }
 
         return true;
@@ -165,16 +165,17 @@ public class Auto extends OpMode {
             }
         }
 
-        // Finding paths
+        // Finding paths (cool stuff)
         for (Field field : fields) {
-            if (field.getType() == PathChain.class && field.getName().startsWith("p")) {
+            if (field.getType() == PathChain.class && field.getName().toLowerCase().startsWith("p")) {
                 try {
                     PathChain p = (PathChain) field.get(paths);
+
                     if (p != null) {
                         pathSequence.add(new NamedPath(field.getName(), p));
                     }
                 } catch (IllegalAccessException e) {
-                    telemetry.addData("Error", "Could not access path: " + field.getName());
+                    telemetry.addData("Error", "Couldn't find path: " + field.getName());
                 }
             }
         }

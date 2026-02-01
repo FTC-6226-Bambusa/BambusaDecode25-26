@@ -81,8 +81,7 @@ public class PID {
      * @param target Target encoder position (ticks)
      * @return Motor power output
      */
-    public double calculatePower(double target) {
-        double pos = motor.getCurrentPosition();
+    public double calculatePower(double pos, double target) {
         double error = target - pos;
 
         double dt = Math.max(timer.seconds(), 1e-6);
@@ -122,7 +121,20 @@ public class PID {
      */
     public void moveTo(double target) {
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        motor.setPower(calculatePower(target));
+        motor.setPower(calculatePower(motor.getCurrentPosition(), target));
+    }
+
+    /**
+     * Applies PID power to accelerate motor to the correct velocity.
+     *
+     * @param target - Target encoder velocity (ticks/1e-6 seconds)
+     */
+    public void setVelocity(double target) {
+        motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        double dt = Math.max(timer.seconds(), 1e-6);
+
+        double velocity = (motor.getCurrentPosition() - lastPos) / dt;
+        motor.setPower(calculatePower(velocity, target));
     }
 
     /**

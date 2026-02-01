@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @Configurable
 public class DriveConfig {
+    public static boolean useFieldCentricDrive = false;
+
     public static double normalSpeed = 0.5;
     public static double boostSpeed = 1.0;
     public static double strafeCorrection = 1.1;
