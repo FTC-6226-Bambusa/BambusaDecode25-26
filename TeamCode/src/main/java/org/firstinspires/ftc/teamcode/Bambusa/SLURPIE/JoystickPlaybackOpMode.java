@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.teamcode.Bambusa.Configurations.DriveConfig;
+import org.firstinspires.ftc.teamcode.Bambusa.Configurations.HardwareMapConfig;
 import org.firstinspires.ftc.teamcode.Bambusa.MecanumDrive;
 
 import java.io.BufferedReader;
@@ -35,13 +36,13 @@ public class JoystickPlaybackOpMode extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         // IMU
-        IMU imu = hardwareMap.get(IMU.class, DriveConfig.imu);
+        IMU imu = hardwareMap.get(IMU.class, HardwareMapConfig.imu);
 
         // Wheels
-        DcMotor fl = hardwareMap.get(DcMotor.class, DriveConfig.frontLeftMotor);
-        DcMotor fr = hardwareMap.get(DcMotor.class, DriveConfig.frontRightMotor);
-        DcMotor bl = hardwareMap.get(DcMotor.class, DriveConfig.backLeftMotor);
-        DcMotor br = hardwareMap.get(DcMotor.class, DriveConfig.backRightMotor);
+        DcMotor fl = hardwareMap.get(DcMotor.class, HardwareMapConfig.frontLeftMotor);
+        DcMotor fr = hardwareMap.get(DcMotor.class, HardwareMapConfig.frontRightMotor);
+        DcMotor bl = hardwareMap.get(DcMotor.class, HardwareMapConfig.backLeftMotor);
+        DcMotor br = hardwareMap.get(DcMotor.class, HardwareMapConfig.backRightMotor);
 
         // Mecanum drive
         MecanumDrive drive = new MecanumDrive(imu, fr, fl, bl, br);

@@ -43,9 +43,7 @@ public class JoystickStoeckl {
         try {
             writer = new BufferedWriter(new FileWriter(file));
 
-            // CSV HEADER
-            writer.write("Time(ms), Strafe, Forward, Turn, Boost, Box X, Box Y, Box Area\n");
-            writer.newLine();
+            // Removed CSV Header
 
             startTime = System.currentTimeMillis();
             lastLogTime = 0;
@@ -101,10 +99,9 @@ public class JoystickStoeckl {
 
         try {
             StringBuilder sb = new StringBuilder();
-
+;
             sb.append(matchTime).append(",");
 
-            // Gamepad 1
             sb.append(format((float) controls.forward())).append(",");
             sb.append(format((float) controls.strafe())).append(",");
             sb.append(format((float) controls.turn())).append(",");

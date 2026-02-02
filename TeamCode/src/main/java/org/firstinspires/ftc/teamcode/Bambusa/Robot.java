@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Bambusa.Configurations.Controls;
 import org.firstinspires.ftc.teamcode.Bambusa.Configurations.DriveConfig;
+import org.firstinspires.ftc.teamcode.Bambusa.Configurations.HardwareMapConfig;
 import org.firstinspires.ftc.teamcode.Bambusa.Configurations.LauncherConfig;
 import org.firstinspires.ftc.teamcode.Bambusa.Configurations.StartConfig;
 import org.firstinspires.ftc.teamcode.Bambusa.Helpers.MathPlus;
@@ -25,15 +26,23 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import java.util.List;
 
 public class Robot {
-    public Limelight3A LL;
+    // Controls
     public Controls controls;
 
-    public MecanumDrive drive;
-    public Launcher launcher;
-    public Intake intake;
-    public Outtake outtake;
-    public Follower follower;
+    // Macros
+    public Limelight3A LL;
     public Artifact artifact;
+    public Follower follower;
+
+    // Drive
+    public MecanumDrive drive;
+
+    // Subsystems
+    public Launcher launcher;
+
+    public Intake intake;
+    public Intake throughtake;
+    public Outtake outtake;
 
     /**
      * Robot class for Tele
@@ -50,24 +59,25 @@ public class Robot {
         LL = hardwareMap.tryGet(Limelight3A.class, "lemonlight");
 
         // IMU
-        IMU imu = hardwareMap.get(IMU.class, DriveConfig.imu);
+        IMU imu = hardwareMap.get(IMU.class, HardwareMapConfig.imu);
 
         // Wheels
-        DcMotor fl = hardwareMap.get(DcMotor.class, DriveConfig.frontLeftMotor);
-        DcMotor fr = hardwareMap.get(DcMotor.class, DriveConfig.frontRightMotor);
-        DcMotor bl = hardwareMap.get(DcMotor.class, DriveConfig.backLeftMotor);
-        DcMotor br = hardwareMap.get(DcMotor.class, DriveConfig.backRightMotor);
+        DcMotor fl = hardwareMap.get(DcMotor.class, HardwareMapConfig.frontLeftMotor);
+        DcMotor fr = hardwareMap.get(DcMotor.class, HardwareMapConfig.frontRightMotor);
+        DcMotor bl = hardwareMap.get(DcMotor.class, HardwareMapConfig.backLeftMotor);
+        DcMotor br = hardwareMap.get(DcMotor.class, HardwareMapConfig.backRightMotor);
 
         drive = new MecanumDrive(imu, fr, fl, bl, br);
 
         // Launcher
-        launcher = new Launcher(hardwareMap.get(DcMotorEx.class, LauncherConfig.launcher));
+        launcher = new Launcher(hardwareMap.get(DcMotorEx.class, HardwareMapConfig.launcher));
 
         // Intake
-        intake = new Intake(hardwareMap.get(Servo.class, LauncherConfig.intake));
+        intake = new Intake(hardwareMap.get(Servo.class, HardwareMapConfig.intake), LauncherConfig.intakeSpeed);
+        throughtake = new Intake(hardwareMap.get(Servo.class, HardwareMapConfig.throughtake), LauncherConfig.throughtakeSpeed);
 
         // Outtake
-        outtake = new Outtake(hardwareMap.get(Servo.class, LauncherConfig.outtake));
+        outtake = new Outtake(hardwareMap.get(Servo.class, HardwareMapConfig.outtake));
 
         // Follower
         follower = Constants.createFollower(hardwareMap);
@@ -85,9 +95,10 @@ public class Robot {
      */
     public Robot(HardwareMap hardwareMap) {
         // Launcher motors
-        launcher = new Launcher(hardwareMap.get(DcMotorEx.class, LauncherConfig.launcher));
-        intake = new Intake(hardwareMap.get(Servo.class, LauncherConfig.intake));
-        outtake = new Outtake(hardwareMap.get(Servo.class, LauncherConfig.outtake));
+        launcher = new Launcher(hardwareMap.get(DcMotorEx.class, HardwareMapConfig.launcher));
+        intake = new Intake(hardwareMap.get(Servo.class, HardwareMapConfig.intake), LauncherConfig.intakeSpeed);
+        throughtake = new Intake(hardwareMap.get(Servo.class, HardwareMapConfig.throughtake), LauncherConfig.throughtakeSpeed);
+        outtake = new Outtake(hardwareMap.get(Servo.class, HardwareMapConfig.outtake));
 
         // Initializes for auto since no gamepads are passed in
         autoInit();
@@ -96,9 +107,10 @@ public class Robot {
     // Initializes for tele
     public void teleInit() {
         intake.enable();
+        throughtake.enable();
 
         // Limelight settings
-        LL.setPollRateHz(100);
+        LL.setPollRateHz(90);
         LL.pipelineSwitch(0);
 
         // Starting limelight
@@ -108,6 +120,7 @@ public class Robot {
     // Initializes for auto
     public void autoInit() {
         intake.enable();
+        throughtake.enable();
         launcher.setPower(LauncherConfig.launcherAutoSpeed);
     }
 
@@ -115,6 +128,9 @@ public class Robot {
      * Performs all necessary actions
      */
     public void run(Telemetry telemetry) {
+        // Setting drive to enabled
+        drive.enabled = true;
+
         // Update localizer
         follower.poseTracker.update();
 
@@ -129,9 +145,6 @@ public class Robot {
 
         // Auto aiming
         if (controls.aim()) {
-            drive.enabled = true;
-            boolean flip = StartConfig.color == StartConfig.AllianceColor.RED;
-
             double x = follower.getPose().getY();
             double z = follower.getPose().getX();
 
@@ -141,6 +154,8 @@ public class Robot {
             double[] choices = LincolnsRottenMustard.getCoords(changed_x, changed_z);
 
             if (choices != null) {
+                drive.enabled = false;
+
                 double targetYaw = Math.toRadians(choices[0] + 225); // Target Angle
 
                 double launcherPower = choices[1] * LauncherConfig.LRMLauncherSpeedFactor + LauncherConfig.LRMLauncherSpeedBias;
@@ -161,19 +176,19 @@ public class Robot {
                 telemetry.addData("Launcher Power", launcherPower);
             }
 
-        } else {
-            drive.enabled = true;
         }
+
+        boolean detectedBall = false;
+        boolean negative = false;
 
         // Slurpie running
         if (controls.slurp()) {
             double[] LLoutput = getLimelightArtifacts();
 
             // Noise smoothing
-            artifact.smoothData(LLoutput);
+            drive.enabled = artifact.smoothData(LLoutput);
 
             if (LLoutput[0] != -1) {
-                drive.enabled = false;
 
                 // Running slurpie
                 double[] slurpieOutput = SlurpSlurp.letsGetSlurpy(LLoutput[0], LLoutput[1], LLoutput[2]);
@@ -192,15 +207,23 @@ public class Robot {
                 telemetry.addData("Boost: ", slurpieOutput[3]);
 
                 // Driving with slurpie
-                 if ((slurpieOutput != null ? slurpieOutput[0] : -1) != -1) {
-                     drive.runWithoutIMU(slurpieOutput[1], slurpieOutput[0], slurpieOutput[2], slurpieOutput[3]);
-                 }
-            } else {
-                drive.enabled = true;
+                if (slurpieOutput[0] != -1) {
+                    negative = slurpieOutput[0] < 0;
+
+                    detectedBall = true;
+
+                    // Overrides gamepad input
+                    drive.runWithoutIMU(true, slurpieOutput[1], slurpieOutput[0], slurpieOutput[2], slurpieOutput[3]);
+                }
             }
-        } else {
-            drive.enabled = true;
         }
+
+        // Whether drive is enabled
+        telemetry.addData("Drive enabled", drive.enabled);
+
+        // Extra tests
+        telemetry.addData("Detected Ball: ", detectedBall);
+        telemetry.addData("Negative Forward: ", negative);
 
         // Driving
         if (DriveConfig.useFieldCentricDrive) {
@@ -212,8 +235,10 @@ public class Robot {
         // Intake control
         if (controls.reverseIntake()) {
             intake.reverse();
+            throughtake.reverse();
         } else {
             intake.forward();
+            throughtake.forward();
         }
 
         // Outtake control
@@ -221,12 +246,17 @@ public class Robot {
             outtake.reverse();
         } else if (controls.powerOuttake()) {
             outtake.forward();
+            throughtake.speed = LauncherConfig.throughtakeFullSpeed;
         } else {
             outtake.disable();
+            throughtake.speed = LauncherConfig.throughtakeSpeed;
         }
 
         // Launcher control
         launcher.setPower(controls.launch(), controls.launchBoost());
+
+        // Updating telemetry again
+        telemetry.update();
     }
 
     /**
@@ -274,6 +304,7 @@ public class Robot {
      */
     public void disableLaunchers() {
         intake.disable();
+        throughtake.disable();
         outtake.disable();
         launcher.disable();
     }

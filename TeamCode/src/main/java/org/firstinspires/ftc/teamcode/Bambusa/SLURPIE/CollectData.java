@@ -25,7 +25,7 @@ public class CollectData {
         LL = hardwareMap.get(Limelight3A.class, "lemonlight");
 
         // Limelight settings
-        LL.setPollRateHz(100);
+        LL.setPollRateHz(90);
         LL.pipelineSwitch(0);
 
         // Start the camera

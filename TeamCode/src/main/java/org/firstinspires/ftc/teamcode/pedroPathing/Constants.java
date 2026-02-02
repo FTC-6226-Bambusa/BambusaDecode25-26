@@ -10,6 +10,7 @@ import com.pedropathing.ftc.localization.constants.ThreeWheelIMUConstants;
 import com.pedropathing.paths.PathConstraints;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.teamcode.Bambusa.Configurations.DriveConfig;
+import org.firstinspires.ftc.teamcode.Bambusa.Configurations.HardwareMapConfig;
 import org.firstinspires.ftc.teamcode.Bambusa.Configurations.LocalizationConfig;
 
 public class Constants {
@@ -42,10 +43,10 @@ public class Constants {
             .xVelocity(88)
             .yVelocity(67)
 
-            .rightFrontMotorName(DriveConfig.frontRightMotor)
-            .rightRearMotorName(DriveConfig.backRightMotor)
-            .leftRearMotorName(DriveConfig.backLeftMotor)
-            .leftFrontMotorName(DriveConfig.frontLeftMotor)
+            .rightFrontMotorName(HardwareMapConfig.frontRightMotor)
+            .rightRearMotorName(HardwareMapConfig.backRightMotor)
+            .leftRearMotorName(HardwareMapConfig.backLeftMotor)
+            .leftFrontMotorName(HardwareMapConfig.frontLeftMotor)
 
             .leftFrontMotorDirection(DriveConfig.frontLeftMotorDirection)
             .leftRearMotorDirection(DriveConfig.backLeftMotorDirection)
@@ -69,7 +70,7 @@ public class Constants {
             .rightEncoderDirection(LocalizationConfig.rightEncoderDirection)
             .strafeEncoderDirection(LocalizationConfig.strafeEncoderDirection)
 
-            .IMU_HardwareMapName(DriveConfig.imu)
+            .IMU_HardwareMapName(HardwareMapConfig.imu)
             .IMU_Orientation(DriveConfig.imuOrientation);
 
     public static Follower createFollower(HardwareMap hardwareMap) {

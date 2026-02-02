@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.Bambusa.SLURPIE;
 
 public class Artifact {
-    public static int inputSmoothing = 4;
+    public static int inputSmoothing = 10;
 
     public double tx;
     public double ty;
@@ -19,8 +19,9 @@ public class Artifact {
      * Tries to smooth blind frames by freezing artifact position on screen (like a sort of lag).
      *
      * @param data the limelight data outputs which include tx, ty, ta
+     * @return whether drive should be enabled
      */
-    public void smoothData(double[] data) {
+    public boolean smoothData(double[] data) {
         // If data is seen
         if (data[0] != -1) {
             // Resetting
@@ -30,6 +31,8 @@ public class Artifact {
             tx = data[0];
             ty = data[1];
             ta = data[2];
+
+            return false;
         } else {
             // Artifact not seen
             ticksNotSeen++;
@@ -37,9 +40,17 @@ public class Artifact {
             // If artifact is not seen, then it essentially freezes input
             // This is the smoothing method, to reduce noise
             if (ticksNotSeen < inputSmoothing) {
-                data = new double[]{tx, ty, ta};
+                data[0] = tx;
+                data[1] = ty;
+                data[2] = ta;
+
+                return false;
             } else {
-                data = new double[]{-1, -1, -1};
+                data[0] = -1;
+                data[1] = -1;
+                data[2] = -1;
+
+                return true;
             }
         }
     }

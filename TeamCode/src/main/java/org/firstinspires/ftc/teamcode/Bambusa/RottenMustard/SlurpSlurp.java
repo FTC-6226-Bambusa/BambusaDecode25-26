@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.Bambusa.RottenMustard;
 public class SlurpSlurp {
     static {
         try {
-            System.loadLibrary("slurp7");
+            System.loadLibrary("slurp8");
         } catch (UnsatisfiedLinkError e) {
             System.err.println("Check jniLibs folder!");
             e.printStackTrace();
